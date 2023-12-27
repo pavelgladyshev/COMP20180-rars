@@ -65,11 +65,11 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // Values for Combo Boxes
 
     private static final String[] visualizationUnitPixelWidthChoices = {"1", "2", "4", "8", "16", "32"};
-    private static final int defaultVisualizationUnitPixelWidthIndex = 0;
+    private static final int defaultVisualizationUnitPixelWidthIndex = 1;
     private static final String[] visualizationUnitPixelHeightChoices = {"1", "2", "4", "8", "16", "32"};
-    private static final int defaultVisualizationUnitPixelHeightIndex = 0;
+    private static final int defaultVisualizationUnitPixelHeightIndex = 1;
     private static final String[] displayAreaPixelWidthChoices = {"64", "128", "256", "512", "1024"};
-    private static final int defaultDisplayWidthIndex = 3;
+    private static final int defaultDisplayWidthIndex = 2;
     private static final String[] displayAreaPixelHeightChoices = {"64", "128", "256", "512", "1024"};
     private static final int defaultDisplayHeightIndex = 2;
 
@@ -400,7 +400,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     //dataBaseAddress=0x10010000, heapBaseAddress=0x10040000, memoryMapBaseAddress=0xffff0000
     private void initializeDisplayBaseChoices() {
         int[] displayBaseAddressArray = {Memory.dataSegmentBaseAddress, Memory.globalPointer, Memory.dataBaseAddress,
-                Memory.heapBaseAddress, Memory.memoryMapBaseAddress};
+                Memory.heapBaseAddress, Memory.memoryMapBaseAddress + 0x8000};
         // Must agree with above in number and order...
         String[] descriptions = {" (global data)", " (gp)", " (static data)", " (heap)", " (memory map)"};
         displayBaseAddresses = displayBaseAddressArray;
@@ -408,7 +408,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         for (int i = 0; i < displayBaseAddressChoices.length; i++) {
             displayBaseAddressChoices[i] = rars.util.Binary.intToHexString(displayBaseAddressArray[i]) + descriptions[i];
         }
-        defaultBaseAddressIndex = 2;  // default to 0x10010000 (static data)
+        defaultBaseAddressIndex = 4;  // default to 0x10010000 (static data)
         baseAddress = displayBaseAddressArray[defaultBaseAddressIndex];
     }
 
