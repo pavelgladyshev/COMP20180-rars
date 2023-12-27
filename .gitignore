@@ -4,7 +4,6 @@ out
 
 # Build products
 build
-rars.jar
 
 # Eclipse project files
 .classpath
