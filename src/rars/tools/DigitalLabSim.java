@@ -5,11 +5,14 @@ import rars.riscv.hardware.*;
 import rars.util.Binary;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.math.BigDecimal;
 import java.util.Observable;
 
 @SuppressWarnings("serial")
@@ -19,7 +22,7 @@ import java.util.Observable;
  */
 public class DigitalLabSim extends AbstractToolAndApplication {
     private static String heading = "Digital Lab Sim";
-    private static String version = " Version 1.0 (Didier Teifreto)";
+    private static String version = " Version 1.0 (Didier Teifreto & Pavel Gladyshev)";
 
     // Used to be static final variables now they are regenerated per instance
     private final int IN_ADRESS_DISPLAY_1, IN_ADRESS_DISPLAY_2, IN_ADRESS_HEXA_KEYBOARD, IN_ADRESS_COUNTER, OUT_ADRESS_HEXA_KEYBOARD;
@@ -35,10 +38,10 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     private HexaKeyboard hexaKeyPanel;
     private static boolean KeyboardInterruptOnOff = false;
     // Counter
-    private static int CounterValueMax = 30;
+    private static int CounterValueMax = 40;
     private static int CounterValue = CounterValueMax;
     private static boolean CounterInterruptOnOff = false;
-    private static OneSecondCounter SecondCounter;
+    private static InterruptCounter interruptCounterPanel;
 
     public DigitalLabSim(String title, String heading) {
         super(title, heading);
@@ -79,29 +82,33 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         else if (address == IN_ADRESS_HEXA_KEYBOARD)
             updateHexaKeyboard(value);
         else if (address == IN_ADRESS_COUNTER)
-            updateOneSecondCounter(value);
-        if (CounterInterruptOnOff)
+            updateInterruptCounter(value);
+        if (CounterInterruptOnOff) {
             if (CounterValue > 0) {
                 CounterValue--;
             } else {
-                CounterValue = CounterValueMax;
+                CounterValue = interruptCounterPanel.getCounterValueMax();
                 InterruptController.registerTimerInterrupt(EXTERNAL_INTERRUPT_TIMER);
             }
+            interruptCounterPanel.setCounterValueDisplay("Counter value = "+Integer.toString(CounterValue));
+        }
+
     }
 
     protected void reset() {
         sevenSegPanel.resetSevenSegment();
         hexaKeyPanel.resetHexaKeyboard();
-        SecondCounter.resetOneSecondCounter();
+        interruptCounterPanel.resetInterruptCounter();
     }
 
     protected JComponent buildMainDisplayArea() {
-        panelTools = new JPanel(new GridLayout(1, 2));
+        panelTools = new JPanel(new GridLayout(1, 3));
         sevenSegPanel = new SevenSegmentPanel();
         panelTools.add(sevenSegPanel);
         hexaKeyPanel = new HexaKeyboard();
         panelTools.add(hexaKeyPanel);
-        SecondCounter = new OneSecondCounter();
+        interruptCounterPanel = new InterruptCounter();
+        panelTools.add(interruptCounterPanel);
         return panelTools;
     }
 
@@ -142,8 +149,9 @@ public class DigitalLabSim extends AbstractToolAndApplication {
                         " If keyboard interruption is enable, an external interrupt is started with value 0x00000200\n \n" +
                         "Counter\n" +
                         " Byte value at address " + Binary.intToHexString(IN_ADRESS_COUNTER) + " : If one bit of this byte is set, the counter interruption is enabled.\n" +
-                        " If counter interruption is enable, every 30 instructions, a timer interrupt is started with value 0x00000100.\n" +
-                        "   (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)";
+                        " If counter interruption is enabled, an external interrupt request is started with value 0x00000100 after\n" +
+                        " perfroming every N CPU instructions (N is specified in the Digital Lab Dim GUI).\n" +
+                        "   (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr, modified by Pavel Gladyshev)";
         JButton help = new JButton("Help");
         help.addActionListener(
                 new ActionListener() {
@@ -360,23 +368,93 @@ public class DigitalLabSim extends AbstractToolAndApplication {
 
     /* ....................Hexa Keyboard end here................................... */
 /* ....................Timer start here................................... */
-    public void updateOneSecondCounter(char value) {
+    public void updateInterruptCounter(char value) {
         if (value != 0) {
             CounterInterruptOnOff = true;
-            CounterValue = CounterValueMax;
+            CounterValue = interruptCounterPanel.getCounterValueMax();
+            interruptCounterPanel.setCounterValueDisplay("Counter value = "+Integer.toString(CounterValue));
         } else {
             CounterInterruptOnOff = false;
+            interruptCounterPanel.setCounterValueDisplay("Counter is disabled");
         }
     }
 
-    public class OneSecondCounter {
-        public OneSecondCounter() {
+    public class InterruptCounter extends JPanel {
+        private JLabel label1;
+        private JLabel label2;
+        private JLabel label3;
+        private JTextField valueMaxField;
+        private JLabel counterValueDisplay;
+
+        private class valueMaxFieldVerifier extends InputVerifier {
+            @Override
+                public boolean verify(JComponent inp) {
+                    JTextField input = (JTextField) inp; 
+                    String text = input.getText();
+                    try {
+                        Integer value = new Integer(text);
+                        if (value.intValue() >= CounterValueMax) {
+                            return true;
+                        } else
+                        {
+                            input.setText(Integer.toString(CounterValueMax));
+                            return false;
+                        } 
+                    } catch (NumberFormatException e) {
+                        input.setText(Integer.toString(CounterValueMax));
+                        return false;
+                    }
+                }
+        }
+
+        public InterruptCounter() {
+
+            // populate GUI display
+            setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
+            BoxLayout layout = new BoxLayout(this,BoxLayout.Y_AXIS);
+            setLayout(layout);
+            label1 = new JLabel("If counter interruption is enabled,");
+            add(label1);
+            label2 = new JLabel("generate an interrupt after every N");
+            add(label2);
+            label3 = new JLabel("CPU intstructions (N>="+Integer.toString(CounterValueMax)+"):");
+            add(label3);
+            add(Box.createRigidArea(new Dimension(0,10)));
+            valueMaxField = new JTextField(Integer.toString(CounterValueMax),20);
+            valueMaxField.setMaximumSize(valueMaxField.getPreferredSize());
+            valueMaxField.setInputVerifier(new valueMaxFieldVerifier()); 
+            Action transfer = new AbstractAction()
+            {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    Component c = (Component)e.getSource();
+                    c.transferFocus();
+                }
+            };
+            valueMaxField.addActionListener(transfer);
+            add(valueMaxField);
+            add(Box.createRigidArea(new Dimension(0,10)));
+            counterValueDisplay = new JLabel("Counter is disabled");
+            add(counterValueDisplay);
+
+            // disable counter initially
             CounterInterruptOnOff = false;
         }
 
-        public void resetOneSecondCounter() {
+        public void setCounterValueDisplay(String s)
+        {
+            counterValueDisplay.setText(s);
+        }
+
+        public void resetInterruptCounter() {
             CounterInterruptOnOff = false;
             CounterValue = CounterValueMax;
+            valueMaxField.setText(Integer.toString(CounterValueMax));
+        }
+
+        public int getCounterValueMax() {
+            return Integer.parseInt(valueMaxField.getText());
         }
     }
 }
