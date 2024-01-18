@@ -13,9 +13,9 @@ main:
   	
   	# Set the handler address and enable interrupts
 	la	t0, handle
-	csrrs	zero, 5, t0
-	csrrsi	zero, 4, 0x10
-	csrrsi	zero, 0, 0x1
+	csrrs	zero, 0x305, t0
+	csrrsi	zero, 0x304, 0x10
+	csrrsi	zero, 0x300, 0x1
 	
 	
 loop:
@@ -65,7 +65,7 @@ handle:
 	lw	a0, 4(sp)
 	lw	a7, 0(sp)
 	addi	sp, sp, 20	
-	uret
+	mret
 
 done:
 	li	a7, 10

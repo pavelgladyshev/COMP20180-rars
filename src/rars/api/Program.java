@@ -208,7 +208,7 @@ public class Program {
     /**
      * Gets the value of a normal, floating-point or control and status register.
      *
-     * @param name Either the common usage (t0, a0, ft0), explicit numbering (x2, x3, f0), or CSR name (ustatus)
+     * @param name Either the common usage (t0, a0, ft0), explicit numbering (x2, x3, f0), or CSR name (mstatus)
      * @return The value of the register as an int (floats are encoded as IEEE-754)
      * @throws NullPointerException if name is invalid; only needs to be checked if code accesses arbitrary names
      */
@@ -227,7 +227,7 @@ public class Program {
     /**
      * Sets the value of a normal, floating-point or control and status register.
      *
-     * @param name Either the common usage (t0, a0, ft0), explicit numbering (x2, x3, f0), or CSR name (ustatus)
+     * @param name Either the common usage (t0, a0, ft0), explicit numbering (x2, x3, f0), or CSR name (mstatus)
      * @param value The value of the register as an int (floats are encoded as IEEE-754)
      * @throws NullPointerException if name is invalid; only needs to be checked if code accesses arbitrary names
      */

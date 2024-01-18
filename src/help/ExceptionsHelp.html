@@ -10,10 +10,11 @@
 
 <i>Interrupts</i> are a way to break away from the current execution path and deal with a potentially time sensitive
 issue and then return to the previous execution path. Interrupts fall into three categories: software, timer, and external.
-Software interrupts are triggered by setting a bit in the interrupt pending CSR. Timer interrupts are triggered by a timer.
-External interrupts come from outside the CPU. Both timer and external interrupts can be caused from tools from the tools menu.
+Software interrupts are triggered by setting a bit in the interrupt pending Control and Status Register (CSR) called "mip". 
+Timer interrupts are triggered by a timer. External interrupts come from outside the CPU. 
+Both timer and external interrupts can be caused from tools from the tools menu.
 
-<i>Synchronous traps</i> are caused by code not being able to continue on its current path without having additional actiion taken.
+<i>Synchronous traps</i> are caused by code not being able to continue on its current path without having additional action taken.
 This can be because the code is incorrect (e.g. load access misaligned) or because action needs to be taken by the OS
 (ecall, ebreak, page fault, etc).
 
@@ -26,34 +27,34 @@ Below is a simple handler which just skips over instructions generating traps:
 .text
 main:
  	la t0,handler
- 	csrrw zero, 5, t0 # set utvec (5) to the handlers address
- 	csrrsi zero, 0, 1 # set interrupt enable bit in ustatus (0)
- 	lw zero, 0        # trigger trap for Load access fault
+ 	csrrw zero, 0x305, t0   # set mtvec register (CSR number 0x305) to the handlers address
+ 	csrrsi zero, 0x300, 1   # set interrupt enable bit in mstatus register (CSR number 0x300)
+ 	lw zero, 0              # trigger trap for Load access fault
  	j main
 
 
-handler: # Just ignore it by moving epc (65) to the next instruction
-	csrrw t0, 65, zero
+handler: # Just ignore it by moving mepc regiser (CSR number 0x341) to the next instruction
+	csrrw t0, 0x341, zero
 	addi t0, t0, 4
-	csrrw zero, 65, t0
-	uret
+	csrrw zero, 0x341, t0
+	mret
 </pre>
 
 In order to have a working exception handler, the program must:
 <ul>
-    <li>Set utvec to the address of the handler code (the lowest two bits are special)</li>
-    <li>Set the bits corresponding to the handled interrupts in uie</li>
-    <li>Set the interrupt enable (lowest) bit in ustatus to enable the handler</li>
+    <li>Set mtvec to the address of the handler code (the lowest two bits are special)</li>
+    <li>Set the bits corresponding to the handled interrupts in mie register (CSR number 0x304)</li>
+    <li>Set the interrupt enable (lowest) bit in mstatus to enable the handler</li>
 </ul>
 
 And inside the handler, :
 <ul>
     <li>The exception handler can return control to the program using
-        the <i>uret</i> instruction.  This will place the uepc CSR value into the
+        the <i>mret</i> instruction.  This will place the mepc CSR value into the
         Program Counter, so be sure to increment it by 4 before returning if you want
         to skip over the instruction that caused the exception. It also resets some other
-        state to before the exception, so jumping to the value in uepc instead is not recommended</li>
-    <li> <i>ucause</i> contains the reason that the exception handler was called.
+        state to before the exception, so jumping to the value in mepc instead is not recommended</li>
+    <li> <i>mcause</i> contains the reason that the exception handler was called.
     </li>
     <li>Exception types declared in <tt>rars.SimulatorException</tt>, but
         not necessarily implemented, are INSTRUCTION_ADDR_MISALIGNED (0),

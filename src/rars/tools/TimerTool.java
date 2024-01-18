@@ -244,7 +244,7 @@ public class TimerTool extends AbstractToolAndApplication {
                     updateMMIOControlAndData(TIME_ADDRESS+4, (int)(time >> 32));
 
                     // The logic for if a timer interrupt should be raised
-                    // Note: if either the UTIP bit in the uie CSR or the UIE bit in the ustatus CSR
+                    // Note: if either the MTIP bit in the mie CSR or the MIE bit in the mstatus CSR
                     //      are zero then this interrupt will be stopped further on in the pipeline
                     if (time >= timeCmp.value && timeCmp.postInterrupt && bitsEnabled()) {
                         InterruptController.registerTimerInterrupt(ControlAndStatusRegisterFile.TIMER_INTERRUPT);
@@ -262,10 +262,10 @@ public class TimerTool extends AbstractToolAndApplication {
 
         // Checks the control bits to see if user-level timer inturrupts are enabled
         private boolean bitsEnabled() {
-            boolean utip = (ControlAndStatusRegisterFile.getValue("uie") & 0x10) == 0x10;
-            boolean uie = (ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) == 0x1;
+            boolean mtip = (ControlAndStatusRegisterFile.getValue("mie") & 0x10) == 0x10;
+            boolean mie = (ControlAndStatusRegisterFile.getValue("mstatus") & 0x1) == 0x1;
 
-            return (utip && uie);
+            return (mtip && mie);
         }
 
         // Set time MMIO to zero
@@ -316,9 +316,9 @@ public class TimerTool extends AbstractToolAndApplication {
             "While this tool is connected to the program it runs a clock (starting from time 0), storing the time in milliseconds. " +
             "The time is stored as a 64 bit integer and can be accessed (using a lw instruction) at 0xFFFF0018 for the lower 32 bits and 0xFFFF001B for the upper 32 bits.\n\n" +
             "Three things must be done before an interrupt can be set:\n" +
-            " The address of your interrupt handler must be stored in the utvec CSR\n" +
-            " The fourth bit of the uie CSR must be set to 1 (ie. ori uie, uie, 0x10)\n" +
-            " The zeroth bit of the ustatus CSR must be set to 1 (ie. ori ustatus, ustatus, 0x1)\n" +
+            " The address of your interrupt handler must be stored in the mtvec CSR\n" +
+            " The fourth bit of the mie CSR must be set to 1 (ie. ori mie, mie, 0x10)\n" +
+            " The zeroth bit of the mstatus CSR must be set to 1 (ie. ori mstatus, mstatus, 0x1)\n" +
             "To set the timer you must write the time that you want the timer to go off (called timecmp) as a 64 bit integer at the address of 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. " +
             "An interrupt will occur when the time is greater than or equal to timecmp which is a 64 bit integer (interpreted as milliseconds) stored at 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. " +
             "To set the timer you must set timecmp (using a sw instruction) to be the time that you want the timer to go off at.\n\n" +

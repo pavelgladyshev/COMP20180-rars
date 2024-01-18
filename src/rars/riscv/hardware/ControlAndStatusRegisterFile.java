@@ -53,17 +53,17 @@ public class ControlAndStatusRegisterFile {
         // TODO: consider making time, cycle and instret 64 bit registers which then are linked to by *h
         // Remember to update the window tooltips when adding a CSR
         Register[] tmp = {
-                new MaskedRegister("ustatus", 0x000, 0,~0x11),
+                new MaskedRegister("mstatus", 0x300, 0,~0x11),
                 null, // fflags
                 null, // frm
                 new MaskedRegister("fcsr", 0x003, 0, ~0xFF),
-                new Register("uie", 0x004, 0),
-                new Register("utvec", 0x005, 0),
-                new Register("uscratch", 0x040, 0),
-                new Register("uepc", 0x041, 0),
-                new Register("ucause", 0x042, 0),
-                new Register("utval", 0x043, 0),
-                new Register("uip", 0x044, 0),
+                new Register("mie", 0x304, 0),
+                new Register("mtvec", 0x305, 0),
+                new Register("mscratch", 0x340, 0),
+                new Register("mepc", 0x341, 0),
+                new Register("mcause", 0x342, 0),
+                new Register("mtval", 0x343, 0),
+                new Register("mip", 0x344, 0),
                 new ReadOnlyRegister("cycle", 0xC00, 0),
                 new ReadOnlyRegister("time", 0xC01, 0),
                 new ReadOnlyRegister("instret",0xC02, 0),

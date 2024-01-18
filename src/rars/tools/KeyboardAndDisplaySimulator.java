@@ -479,7 +479,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
                         "Very event-oriented.  The Ready bit is supposed to be read-only but in RARS it is not.\n" +
                         "\n" +
                         "A similar test and potential response occurs when the Transmitter Controller's Ready bit is set to 1.  This " +
-                        "occurs after the simulated delay described above.  The only difference that utval will have a different code.  This permits you to " +
+                        "occurs after the simulated delay described above.  The only difference that mtval will have a different code.  This permits you to " +
                         "write programs that perform interrupt-driven output - the program can perform useful tasks while the " +
                         "output device is processing its data.  Much better than idling in a loop polling the Transmitter Ready bit! " +
                         "The Ready bit is supposed to be read-only but in RARS it is not.\n" +
