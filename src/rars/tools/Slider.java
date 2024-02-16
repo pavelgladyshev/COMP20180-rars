@@ -3,11 +3,14 @@ package rars.tools;
 import rars.Globals;
 import rars.riscv.hardware.AddressErrorException;
 import rars.riscv.hardware.Memory;
+import rars.util.Binary;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -15,7 +18,7 @@ public class Slider extends AbstractToolAndApplication{
 
     // Menu/Program info (Title, header, memory location, etc.)
     private static String title = "Slider tool";
-    private static String header = "Slider tool"; // I don't know how to write these v_v
+    private static String header = "Slider tool - Sebastian Drayne"; // I don't know how to write these v_v
     private final int SLIDER_MEM_LOCATION;
 
 
@@ -47,6 +50,29 @@ public class Slider extends AbstractToolAndApplication{
 
     public void addAsObserver() {
         addAsObserver(SLIDER_MEM_LOCATION, SLIDER_MEM_LOCATION);
+    }
+
+    // I copy-pasted this from DigitalLabSim.java.
+    protected JComponent getHelpComponent() {
+        final String helpContent = "A simple implementation of a slider component. Outputs to " + Binary.intToHexString(SLIDER_MEM_LOCATION) +
+                """
+                .\nThe check box outputs the slider's value as a half. This enables more precision.
+                (Contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr, modified by Pavel Gladyshev and Sebastian Drayne)
+                """;
+        JButton help = new JButton("Help");
+        help.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        JTextArea ja = new JTextArea(helpContent);
+                        ja.setRows(20);
+                        ja.setColumns(60);
+                        ja.setLineWrap(true);
+                        ja.setWrapStyleWord(true);
+                        JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
+                                "Simulating a slider component", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                });
+        return help;
     }
 
     @Override
@@ -106,6 +132,7 @@ public class Slider extends AbstractToolAndApplication{
             this.setPreferredSize(new Dimension(100, 20));
         }
 
+        // Sets the slider to half
         public void resetSlider() {
             slider.setValue(32767);
         }
@@ -125,10 +152,11 @@ public class Slider extends AbstractToolAndApplication{
         }
     }
 
+    // This increases precision.
     public class CheckComp extends JPanel {
         private JCheckBox cb;
         public CheckComp() {
-            this.cb = new JCheckBox("Enable double");
+            this.cb = new JCheckBox("Enable half");
             this.add(cb);
 
             this.cb.addItemListener(e -> {
