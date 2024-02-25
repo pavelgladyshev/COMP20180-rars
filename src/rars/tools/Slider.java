@@ -17,8 +17,8 @@ import java.awt.event.ItemListener;
 public class Slider extends AbstractToolAndApplication{
 
     // Menu/Program info (Title, header, memory location, etc.)
-    private static String title = "Slider tool";
-    private static String header = "Slider tool - Sebastian Drayne"; // I don't know how to write these v_v
+    private static String title = "Slider tool - Sebastian Drayne";
+    private static String header = "Slider tool"; // I don't know how to write these v_v
     private final int SLIDER_MEM_LOCATION;
 
 
