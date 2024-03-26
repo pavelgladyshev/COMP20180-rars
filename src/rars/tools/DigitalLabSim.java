@@ -90,7 +90,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
                 CounterValue = interruptCounterPanel.getCounterValueMax();
                 InterruptController.registerTimerInterrupt(EXTERNAL_INTERRUPT_TIMER);
             }
-            interruptCounterPanel.setCounterValueDisplay("Counter value = "+Integer.toString(CounterValue));
+            interruptCounterPanel.setCounterValueDisplay("Counter value = "+ CounterValue);
         }
 
     }
@@ -103,12 +103,16 @@ public class DigitalLabSim extends AbstractToolAndApplication {
 
     protected JComponent buildMainDisplayArea() {
         panelTools = new JPanel(new GridLayout(1, 3));
+
         sevenSegPanel = new SevenSegmentPanel();
         panelTools.add(sevenSegPanel);
+
         hexaKeyPanel = new HexaKeyboard();
         panelTools.add(hexaKeyPanel);
+
         interruptCounterPanel = new InterruptCounter();
         panelTools.add(interruptCounterPanel);
+
         return panelTools;
     }
 
@@ -291,7 +295,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     }
 
     /* ...........................Seven segment display end here ..............................*/
-/* ....................Hexa Keyboard start here................................... */
+    /* ....................Hexa Keyboard start here................................... */
     public void updateHexaKeyboard(char row) {
         int key = KeyBoardValueButtonClick;
         if ((key != -1) && ((1 << (key / 4)) == (row & 0xF))) {
@@ -349,7 +353,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
 
             public void mouseClicked(MouseEvent arg0) {
                 int i;
-                if (KeyBoardValueButtonClick != -1) {//Button already pressed -> now realease
+                if (KeyBoardValueButtonClick != -1) {//Button already pressed -> now release
                     KeyBoardValueButtonClick = -1;
                     updateMMIOControlAndData(OUT_ADRESS_HEXA_KEYBOARD, 0);
                     for (i = 0; i < 16; i++)
@@ -392,8 +396,8 @@ public class DigitalLabSim extends AbstractToolAndApplication {
                     JTextField input = (JTextField) inp; 
                     String text = input.getText();
                     try {
-                        Integer value = new Integer(text);
-                        if (value.intValue() >= CounterValueMax) {
+                        int value = Integer.parseInt(text);
+                        if (value >= CounterValueMax) {
                             return true;
                         } else
                         {
